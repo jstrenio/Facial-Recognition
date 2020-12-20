@@ -1,5 +1,5 @@
 # John Strenio
-# facial recognition attempt using keras and a cnn
+# facial recognition program using pretrained model
 
 # ================== IMPORT LIBRARIES ==============================
 

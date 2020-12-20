@@ -1,0 +1,27 @@
+Facial Recognition CNN without transfer learning
+John Strenio
+12.19.20
+
+Citations:
+    This program was made with the help of these tutorials:
+        On Tensorflow with Keras:
+        https://www.tensorflow.org/tutorials/quickstart/beginner
+
+        On Convolutional Neural Networks:
+        https://towardsdatascience.com/10-minutes-to-building-a-cnn-binary-image-classifier-in-tensorflow-4e216b2034aa
+
+        On OpenCV facial image processing:
+        https://medium.com/yottabytes/a-quick-guide-on-preprocessing-facial-images-for-neural-networks-using-opencv-in-python-47ee3438abd4
+
+Dependencies:
+    This program requires:
+        imutils 0.5.3
+        Keras 2.4.3
+        Tensorflow 2.3.0
+        Numpy 1.18.5
+        OpenCV 4.4.0.42
+
+Instructions:
+    Take exactly 200 images of the target's face and upload them to the raw_images folder. The photos should be of different facial expressions,
+    different lighting, and different (slight) angles from the front of the face. run build_dataset_train_model.py. After completion run
+    facial_rec.py

@@ -1,23 +1,21 @@
+# John Strenio
+# build dataset and train CNN model on it
+
+# import libraries
 import os
 import math
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.preprocessing import image
 import tensorflow as tf
 import numpy as np
-from PIL import Image
-import imutils
 import cv2
-
-# ignore warnings
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-
 from numpy import expand_dims
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import save_img
 from keras.preprocessing.image import img_to_array
-from keras.preprocessing.image import ImageDataGenerator
+
+# ignore warnings
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 def proc_image(filename, dest_dir):
 
@@ -125,98 +123,116 @@ def aug_image(filename, n_augs, f, dest_dir):
     # show the figure
     #pyplot.show()
 
+def build_dataset():
 
-print("building dataset...")
+    print("building dataset...")
 
-# just set the source directory and destination directory and process or augment as needed
-source_dir_target = 'raw_images/' #'other_data_sets/faces_processed_not_augmented/lj/'
-aug_dir_target = 'unaugmented_images/'
-dest_dir_target = 'processed_images/target/' 
+    # just set the source directory and destination directory and process or augment as needed
+    source_dir_target = 'raw_images/' #'other_data_sets/faces_processed_not_augmented/lj/'
+    aug_dir_target = 'unaugmented_images/'
+    dest_dir_target = 'processed_images/target/' 
 
-print("processing images...")
-for f in os.listdir(source_dir_target):
-    proc_image(source_dir_target + f, aug_dir_target)
-print("done.")
+    print("processing images...")
+    for f in os.listdir(source_dir_target):
+        proc_image(source_dir_target + f, aug_dir_target)
+    print("done.")
 
-print("augmenting images...")
-for f in os.listdir(aug_dir_target):
-    aug_image(aug_dir_target + f, 4, f, dest_dir_target)
-print("done.")
+    print("augmenting images...")
+    for f in os.listdir(aug_dir_target):
+        aug_image(aug_dir_target + f, 4, f, dest_dir_target)
 
-for f in os.listdir(aug_dir_target):
-    img = load_img(aug_dir_target + f)
-    save_img('valid_face/target/' + f + '.jpg', img)
+    for f in os.listdir(aug_dir_target):
+        img = load_img(aug_dir_target + f)
+        save_img('valid_face/target/' + f + '.jpg', img)
+    print("done.")
 
-print("training model on dataset...")
+    print("finished buidling dataset.")
 
-# ================== TRAIN MODEL ==============================
+def train_model():
+    # ================== TRAIN MODEL ==============================
 
-# import the data and rescale from 255 grayscale values to decimal 0 - 1.0
-train_datagen = ImageDataGenerator(rescale=1./255)
-validation_datagen = ImageDataGenerator(rescale=1./255)
+    print("training model on dataset...")
 
-# preprocess images in batches
-train_generator = train_datagen.flow_from_directory(
-    # source dir
-    'processed_images',
-    classes = ['stranger', 'target'],
-    target_size=(128,128),
-    batch_size=1, #104, # batch_size * steps_per_epoch in model.fit below should = num_images
-    # binary labels
-    class_mode='binary',
-    color_mode='grayscale',
-    #shuffle=True
-    )
+    # import the data and rescale from 255 grayscale values to decimal 0 - 1.0
+    train_datagen = ImageDataGenerator(rescale=1./255)
+    validation_datagen = ImageDataGenerator(rescale=1./255)
 
-validation_generator = validation_datagen.flow_from_directory(
-    # source dir
-    'valid_face',
-    classes = ['stranger', 'target'],
-    target_size=(128,128),
-    batch_size=1, #10, # batch_size * steps_per_epoch in model.fit below should = num_images
-    # binary labels
-    class_mode='binary',
-    color_mode='grayscale',
-    shuffle=False
-    )
+    # preprocess images in batches
+    train_generator = train_datagen.flow_from_directory(
+        # source dir
+        'processed_images',
+        classes = ['stranger', 'target'],
+        target_size=(128,128),
+        batch_size=1, #104, # batch_size * steps_per_epoch in model.fit below should = num_images
+        # binary labels
+        class_mode='binary',
+        color_mode='grayscale',
+        #shuffle=True
+        )
 
-# build model
-model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Conv2D(16, (3,3), activation='relu', input_shape=(128, 128, 1)))
-model.add(tf.keras.layers.MaxPooling2D(2, 2))
-model.add(tf.keras.layers.Conv2D(32, (3,3), activation='relu'))
-model.add(tf.keras.layers.MaxPooling2D(2,2))
-model.add(tf.keras.layers.Conv2D(64, (3,3), activation='relu'))
-model.add(tf.keras.layers.MaxPooling2D(2,2))
-model.add(tf.keras.layers.Conv2D(64, (3,3), activation='relu'))
-model.add(tf.keras.layers.MaxPooling2D(2,2))
-model.add(tf.keras.layers.Conv2D(64, (3,3), activation='relu'))
-model.add(tf.keras.layers.MaxPooling2D(2,2))
-# Flatten the results to feed into a DNN
-model.add(tf.keras.layers.Flatten())
-# 512 neuron hidden layer # dense ouput = (batch_size, units)
-model.add(tf.keras.layers.Dense(512, activation='relu'))
-# Only 1 output neuron. It will contain a value from 0-1 where 0 for 1 class ('other') and 1 for the other ('lj')
-model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    validation_generator = validation_datagen.flow_from_directory(
+        # source dir
+        'valid_face',
+        classes = ['stranger', 'target'],
+        target_size=(128,128),
+        batch_size=1, #10, # batch_size * steps_per_epoch in model.fit below should = num_images
+        # binary labels
+        class_mode='binary',
+        color_mode='grayscale',
+        shuffle=False
+        )
 
-model.compile(optimizer=tf.optimizers.Adam(learning_rate=0.0001),
-              loss = 'binary_crossentropy',
-              metrics=['accuracy'])
+    # build model
+    model = tf.keras.models.Sequential()
+    model.add(tf.keras.layers.Conv2D(16, (3,3), activation='relu', input_shape=(128, 128, 1)))
+    model.add(tf.keras.layers.MaxPooling2D(2, 2))
+    model.add(tf.keras.layers.Conv2D(32, (3,3), activation='relu'))
+    model.add(tf.keras.layers.MaxPooling2D(2,2))
+    model.add(tf.keras.layers.Conv2D(64, (3,3), activation='relu'))
+    model.add(tf.keras.layers.MaxPooling2D(2,2))
+    model.add(tf.keras.layers.Conv2D(64, (3,3), activation='relu'))
+    model.add(tf.keras.layers.MaxPooling2D(2,2))
+    model.add(tf.keras.layers.Conv2D(64, (3,3), activation='relu'))
+    model.add(tf.keras.layers.MaxPooling2D(2,2))
+    # Flatten the results to feed into a DNN
+    model.add(tf.keras.layers.Flatten())
+    # 512 neuron hidden layer # dense ouput = (batch_size, units)
+    model.add(tf.keras.layers.Dense(512, activation='relu'))
+    # Only 1 output neuron. It will contain a value from 0-1 where 0 for 1 class ('other') and 1 for the other ('lj')
+    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
-# train model
-history = model.fit(train_generator,
-                    # DON'T SET BATCH SIZE IF USING DATA GENERATORS SINCE THEY SET BATCH SIZE
-                    #  steps_per_epoch * batch_size in generator above should = num_images
-                    steps_per_epoch=1000,
-                    epochs=30,
-                    verbose=1,
-                    validation_data=validation_generator,
-                    validation_steps=200
-                    ) 
+    model.compile(optimizer=tf.optimizers.Adam(learning_rate=0.0001),
+                loss = 'binary_crossentropy',
+                metrics=['accuracy'])
 
-model.save("saved_model1")
+    # train model
+    history = model.fit(train_generator,
+                        # DON'T SET BATCH SIZE IF USING DATA GENERATORS SINCE THEY SET BATCH SIZE
+                        #  steps_per_epoch * batch_size in generator above should = num_images
+                        steps_per_epoch=1000,
+                        epochs=30,
+                        verbose=1,
+                        validation_data=validation_generator,
+                        validation_steps=200
+                        ) 
 
-print("done.")
+    model.save("saved_model1")
+
+    print("model trained and saved.")
+
+
+build_dataset()
+
+train_model()
+
+
+
+
+
+
+
+
+
 
 
 
