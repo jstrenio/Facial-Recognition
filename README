@@ -24,4 +24,5 @@ Dependencies:
 Instructions:
     Take exactly 200 images of the target's face and upload them to the raw_images folder. The photos should be of different facial expressions,
     different lighting, and different (slight) angles from the front of the face. run build_dataset_train_model.py. After completion run
-    facial_rec.py
+    facial_rec.py. Once a model in built the dataset and model do not need to be reconstructed unless you'd like to add new or different images
+    for training.
