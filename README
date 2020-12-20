@@ -26,3 +26,5 @@ Instructions:
     different lighting, and different (slight) angles from the front of the face. run build_dataset_train_model.py. After completion run
     facial_rec.py. Once a model in built the dataset and model do not need to be reconstructed unless you'd like to add new or different images
     for training.
+    
+Demo: https://youtu.be/xe5YaNbCjfw
